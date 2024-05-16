@@ -1,0 +1,5 @@
+# ignorer les images sinon c'est trop lourd 
+*.png
+
+# ignorer les vidéos aussi
+*.mp4
