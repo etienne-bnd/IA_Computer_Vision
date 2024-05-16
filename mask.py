@@ -34,9 +34,9 @@ def create_mask(image, position='left', border_ratio=0.01):
     border_width = int(width * border_ratio)
     mask = np.zeros((height, width), dtype=np.uint8)
     #normalement vrai truc mais je teste autre chose
-    if position == 'right':
+    if position == 'left':
         mask[:, :width // 7] = 255
-    elif position == 'left':    
+    elif position == 'right':    
         mask[:, 6 * width // 7 :] = 255
 
     # if position == 'left':

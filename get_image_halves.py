@@ -31,15 +31,19 @@ def get_image_halves(image):
 
 if __name__ == "__main__":
     video_path = "videos_out_reserve//out10.mp4"
-    image = framebyframe(video_path, 110)
+    image = framebyframe(video_path, 0)
     if image is None:
         print(f"Impossible de charger l'image ")
         exit()
         # Obtenir les parties gauche et droite de l'image
     left_half, right_half = get_image_halves(image)
+    
+    # pour enlever les gradins
+    _, left_half = get_image_halves(left_half)
+    right_half, _ = get_image_halves(right_half)
 
-    cv2.imwrite("right_part.png",left_half) 
-    cv2.imwrite("left_part.png",right_half) 
+    cv2.imwrite("left_part.png",left_half) 
+    cv2.imwrite("right_part.png",right_half) 
 
 
 

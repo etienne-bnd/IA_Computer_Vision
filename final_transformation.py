@@ -34,8 +34,5 @@ def transformation(stitched_img):
     x, y, w, h = cv2.boundingRect(areaOI)
 
     stitched_img = stitched_img[y:y + h, x:x + w]
-    afficher_video = resize_image(stitched_img)
-    cv2.imshow("a", afficher_video)
-    cv2.waitKey(1)
     return stitched_img
 

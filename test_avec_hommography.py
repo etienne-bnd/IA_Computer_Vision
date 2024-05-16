@@ -1,5 +1,8 @@
 import cv2
 import numpy as np
+from resize_imageP import resize_image
+from framebyframe import framebyframe
+from get_image_halves import get_image_halves
 
 # taking two images for stiching
 img1 = cv2.imread('left_part.png')
@@ -57,12 +60,55 @@ def hommography(img1, img2):
     # cv2.waitKey(0)
     return results
 
+def hommography_return_M(img1, img2):
+    """take two image and return the matching image"""
+        #find correspondence
+    pts1, pts2, matches = keypoints(img1, img2)
+    #threshold num of correspondence obtain
+    if len(matches) <= 15:
+        print("image pair is not suaitable for stiching")
+        return None
+        #M = np.identity(3) # no homography generated
+    else:
+        # find homography matrix between images :
+        M , mask = cv2.findHomography(pts2, pts1, cv2.RANSAC, ransacReprojThreshold = 3)
+        return M
+
+def apply_the_matrix(M, img1, img2):
+        width = img1.shape[1] + img2.shape[1]
+        height = img1.shape[0] + 100
+        results = cv2.warpPerspective(img2, M, (width,height))
+        #appending images 2 to first
+        results[0:img1.shape[0],0:img1.shape[1]] = img1
+        return results
 
 if __name__ == "__main__":
     # taking two images for stiching
     img1 = cv2.imread('left_part.png')
     img2 = cv2.imread('right_part.png')
-    results = hommography(img1, img2)
+
+    video_path = "videos_out_reserve//out10.mp4"
+    image = framebyframe(video_path, 100)
+    if image is None:
+        print(f"Impossible de charger l'image ")
+        exit()
+        # Obtenir les parties gauche et droite de l'image
+    left_half, right_half = get_image_halves(image)
+        # pour enlever les gradins
+    _, left_half = get_image_halves(left_half)
+    right_half, _ = get_image_halves(right_half)
+
+
+
+
+    ### avec la technique en séparant la matrice de base ###
+    M = hommography_return_M(img1, img2)
+    results = apply_the_matrix(M, left_half, right_half)
+
+
+    # results = hommography(img1, img2)
+
+    ### pour l'affichage du résultat ###
+    results = resize_image(results, 20)
     cv2.imshow('img',results)
-    cv2.imwrite('results1.png',results)     #for saving image
     cv2.waitKey(0)
