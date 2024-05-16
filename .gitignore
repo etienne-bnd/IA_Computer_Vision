@@ -3,3 +3,6 @@
 
 # ignorer les vidéos aussi
 *.mp4
+
+# ignorer les images jpg
+*.jpg
