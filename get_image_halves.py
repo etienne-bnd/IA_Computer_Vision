@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from resize_imageP import resize_image
 from framebyframe import framebyframe
-from imageStitching import image_stitcher
+# from imageStitching import image_stitcher
 
 def get_image_halves(image):
     """
@@ -29,18 +29,17 @@ def get_image_halves(image):
     
     return left_half, right_half
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
+    video_path = "videos_out_reserve//out10.mp4"
+    image = framebyframe(video_path, 110)
+    if image is None:
+        print(f"Impossible de charger l'image ")
+        exit()
+        # Obtenir les parties gauche et droite de l'image
+    left_half, right_half = get_image_halves(image)
 
-    # image_path = "right_part.png"
-    # image = cv2.imread(image_path)
-    # if image is None:
-    #     print(f"Impossible de charger l'image ")
-    #     exit()
-    #     # Obtenir les parties gauche et droite de l'image
-    # left_half, right_half = get_image_halves(image)
-
-    # cv2.imwrite("right_part.png",left_half) 
-    # # cv2.imwrite("left_part.png",right_half) 
+    cv2.imwrite("right_part.png",left_half) 
+    cv2.imwrite("left_part.png",right_half) 
 
 
 
