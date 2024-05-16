@@ -2,14 +2,19 @@ import cv2
 import numpy as np
 from resize_imageP import resize_image
 from framebyframe import framebyframe
-from get_image_halves import get_image_halves
+from get_image_halves import get_image_halves, get_image_halves_without_border
 
 # taking two images for stiching
 img1 = cv2.imread('left_part.png')
 img2 = cv2.imread('right_part.png')
 
 def keypoints(img1, img2):
-    """detection keypoints"""
+    """detection keypoints
+
+    -Args : image numpy
+
+    -Return : pts1,pts2,matches
+    """
     sift = cv2.SIFT_create()
     # find the keypoints and descriptors with SIFT
     kp1, des1 = sift.detectAndCompute(img1,None)
@@ -83,32 +88,24 @@ def apply_the_matrix(M, img1, img2):
         return results
 
 if __name__ == "__main__":
-    # taking two images for stiching
-    img1 = cv2.imread('left_part.png')
-    img2 = cv2.imread('right_part.png')
-
     video_path = "videos_out_reserve//out10.mp4"
-    image = framebyframe(video_path, 100)
+    image = framebyframe(video_path, 3000)
+    # 3000 à l'air bien pour récupérer la matrice
     if image is None:
         print(f"Impossible de charger l'image ")
         exit()
         # Obtenir les parties gauche et droite de l'image
-    left_half, right_half = get_image_halves(image)
-        # pour enlever les gradins
-    _, left_half = get_image_halves(left_half)
-    right_half, _ = get_image_halves(right_half)
-
-
-
+    left_half, right_half = get_image_halves_without_border(image)
 
     ### avec la technique en séparant la matrice de base ###
-    M = hommography_return_M(img1, img2)
+    M = hommography_return_M(left_half, right_half)
     results = apply_the_matrix(M, left_half, right_half)
-
+    cv2.imwrite("visualisation.png", results)
 
     # results = hommography(img1, img2)
 
     ### pour l'affichage du résultat ###
     results = resize_image(results, 20)
+
     cv2.imshow('img',results)
     cv2.waitKey(0)

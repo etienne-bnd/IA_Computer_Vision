@@ -34,9 +34,9 @@ def create_mask(image, position='left', border_ratio=0.01):
     border_width = int(width * border_ratio)
     mask = np.zeros((height, width), dtype=np.uint8)
     #normalement vrai truc mais je teste autre chose
-    if position == 'left':
+    if position == 'right':
         mask[:, :width // 7] = 255
-    elif position == 'right':    
+    elif position == 'left':    
         mask[:, 6 * width // 7 :] = 255
 
     # if position == 'left':
@@ -49,10 +49,10 @@ def create_mask(image, position='left', border_ratio=0.01):
 def main():
     # Charger les images
     image_left = cv2.imread('left_part.png')
-    image_left = resize_image(image_left)
+    # image_left = resize_image(image_left)
     image_right = cv2.imread('right_part.png')
-    image_right = resize_image(image_right)
-    NCC(image_left, image_right)
+    # image_right = resize_image(image_right)
+    # NCC(image_left, image_right)
     # cv2.imshow("left", image_left)
     # cv2.imshow("right", image_right)
     # cv2.waitKey(0)
@@ -72,19 +72,30 @@ def main():
     cv2.imshow("Left Image with Mask", image_left_with_mask)
     cv2.imshow("Right Image with Mask", image_right_with_mask)
     cv2.waitKey(0)
-
     images = [image_left, image_right]
     masks = [mask_left, mask_right]
 
     # Créer l'image Stitcher
-    imageStitcher = cv2.Stitcher_create()
-
+    imageStitcher = cv2.Stitcher_create(mode=cv2.Stitcher_SCANS)
+    seuil_confiance = 0.6 # Par exemple, 1%
+    imageStitcher.setPanoConfidenceThresh(seuil_confiance)
     # Exécuter la fonction stitch avec les masques
+    # Définir le mode souhaité
+    # nouveau_mode = cv2.Stitcher_PANORAMA  # Remplacez Stitcher_SCANS par le mode que vous souhaitez utiliser
+
+    # # Définir le mode sur le Stitcher
+    # imageStitcher.setInterpolationFlags(nouveau_mode)
     status, stitched_img = imageStitcher.stitch(images, masks)
 
     # Vérifier si le stitching s'est déroulé avec succès
     if status == cv2.Stitcher_OK:
         print("Stitching réussi")
+        # Récupérer lamatrice de transformation
+        # mask = imageStitcher.resultMask()
+        # cv2.imwrite('mask.png', mask)
+
+        cv2.imwrite("stitchedOutput.png", stitched_img)
+        stitched_img = resize_image(stitched_img, 20)
         cv2.imshow("Stitched Image", stitched_img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
@@ -92,4 +103,5 @@ def main():
         print("Le stitching a échoué : ", status)
 
 if __name__ == "__main__":
+    
     main()
