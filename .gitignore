@@ -6,3 +6,6 @@
 
 # ignorer les images jpg
 *.jpg
+
+# Ignorer les répertoires __pycache__ générés par Python
+__pycache__/
