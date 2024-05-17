@@ -4,10 +4,10 @@ import numpy as np
 from resize_imageP import resize_image
 
 def transformation(stitched_img): 
-    
+
     """ fonction to remove dark border"""
 
-    stitched_img = cv2.copyMakeBorder(stitched_img, 30, 30, 30, 30, cv2.BORDER_CONSTANT, (0,0,0))    
+    stitched_img = cv2.copyMakeBorder(stitched_img, 50, 50, 50, 50, cv2.BORDER_CONSTANT, (0,0,0))    
     gray = cv2.cvtColor(stitched_img, cv2.COLOR_BGR2GRAY)
     thresh_img = cv2.threshold(gray, 0, 255 , cv2.THRESH_BINARY)[1]
 

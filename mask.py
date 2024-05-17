@@ -64,14 +64,17 @@ def main():
     # Créer des masques pour les images
     mask_left = create_mask(image_left, 'left', border_ratio=0.01)
     mask_right = create_mask(image_right, 'right', border_ratio=0.01)
-    # Superposer les masques sur les images
-    image_left_with_mask = cv2.bitwise_and(image_left, image_left, mask=mask_left)
-    image_right_with_mask = cv2.bitwise_and(image_right, image_right, mask=mask_right)
 
-    # Afficher les images avec les masques
-    cv2.imshow("Left Image with Mask", image_left_with_mask)
-    cv2.imshow("Right Image with Mask", image_right_with_mask)
-    cv2.waitKey(0)
+
+    ### pour voir les masques ###
+    # # Superposer les masques sur les images
+    # image_left_with_mask = cv2.bitwise_and(image_left, image_left, mask=mask_left)
+    # image_right_with_mask = cv2.bitwise_and(image_right, image_right, mask=mask_right)
+
+    # # Afficher les images avec les masques
+    # cv2.imshow("Left Image with Mask", image_left_with_mask)
+    # cv2.imshow("Right Image with Mask", image_right_with_mask)
+    # cv2.waitKey(0)
     images = [image_left, image_right]
     masks = [mask_left, mask_right]
 

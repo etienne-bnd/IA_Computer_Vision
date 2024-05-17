@@ -44,9 +44,12 @@ def frame_to_final_stitch(frame):
     left_mask = create_mask(left_half, 'left')
     right_mask = create_mask(right_half, 'right')
     masks = [left_mask, right_mask]
+    left_half = left_half.copy()
+    right_half = right_half.copy()
+
     images = [left_half, right_half]
     image_stitched = image_stitcher(images, masks)
-
+    return transformation(image_stitched)
 
 
 
@@ -57,11 +60,23 @@ if __name__ == "__main__":
 
 ### partie avec le stitching ###
     frame = framebyframe(video_path, 0)
-    frame_to_final_stitch(frame)
+    frame_0 = frame_to_final_stitch(frame)
+    height, width, _ = frame_0.shape
+    out = cv2.VideoWriter(output_path, fourcc, 30, (width, height))
+    for i in tqdm(range(100)):
+        frame = framebyframe(video_path, i)
+        frame = frame_to_final_stitch(frame)
+    #     out.write(frame)
+    # out.release()
+
+        ## pour afficher frame by frame
+        frame = resize_image(frame, 20)
+        cv2.imshow("final", frame)
+        cv2.waitKey(1)
 
 ### partie ou on calcule la matrice une fois et on réaplique à chaque passage
     # img1 = cv2.imread('left_part.png')
-    # img2 = cv2.imread('right_part.png')
+    # img2 = cv2.imread('right_part.png')q
     # M = hommography_return_M(img1, img2)
     # frame_0 = frame_to_final_with_M(framebyframe(video_path, 0), M)
     # height, width, _ = frame_0.shape
@@ -77,7 +92,7 @@ if __name__ == "__main__":
         # frame_affich = resize_image(frame, 20)
         # cv2.imshow("final", frame_affich)
         # cv2.waitKey(1)
-    out.release()
+    # out.release()
 
 
 ### partie ou on recalcule la matrice frame by frame ###
