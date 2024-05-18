@@ -1,7 +1,10 @@
 import cv2
-# import numpy as np
 from framebyframe import framebyframe
-# from imageStitching import image_stitcher
+from resize_imageP import resize_image
+import numpy as np
+import tkinter as tk
+from tkinter import messagebox
+
 
 def get_image_halves(image):
     """
@@ -51,12 +54,16 @@ def get_image_halves_without_border(image):
     return left_half, right_half
 
 
-
+def get_screen_size():
+    root = tk.Tk()
+    root.withdraw()
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    root.destroy()
+    return screen_width, screen_height
 
 
 if __name__ == "__main__":
-
-
     video_path = "videos_out_reserve//out10.mp4"
     image = framebyframe(video_path, 0)
     if image is None:
@@ -64,9 +71,30 @@ if __name__ == "__main__":
         exit()
     # Obtenir les parties gauche et droite de l'image
     left_half, right_half = get_image_halves_without_border(image)
+    left_half = resize_image(left_half, 20)
+    right_half = resize_image(right_half, 20)
+    cv2.imshow("left half", left_half)
+    cv2.imshow("right half", right_half)
+    # Obtenir la taille de l'écran
+    screen_width, screen_height = get_screen_size()
 
-    cv2.imwrite("left_part.png",left_half) 
-    cv2.imwrite("right_part.png",right_half) 
+    # Calculer les coordonnées pour centrer les fenêtres
+    left_x = max(0, (screen_width - left_half.shape[1]) // 2)
+    left_y = max(0, (screen_height - left_half.shape[0]) // 2)
+    right_x = max(0, left_x + left_half.shape[1])
+    right_y = left_y
+
+    # Afficher les images au centre de l'écran
+    cv2.imshow("left half", left_half)
+    cv2.moveWindow("left half", left_x, left_y)
+    cv2.imshow("right half", right_half)
+    cv2.moveWindow("right half", right_x, right_y)
+
+    # Attendre une pression de touche
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    # cv2.imwrite("left_part.png",left_half) 
+    # cv2.imwrite("right_part.png",right_half) 
 
     
 
