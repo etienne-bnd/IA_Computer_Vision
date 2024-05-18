@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
-from resize_imageP import resize_image
-from framebyframe import framebyframe
-from get_image_halves import get_image_halves, get_image_halves_without_border
+from stitching.resize_imageP import resize_image
+from stitching.framebyframe import framebyframe
+from stitching.get_image_halves import get_image_halves, get_image_halves_without_border
 
 # taking two images for stiching
 img1 = cv2.imread('left_part.png')

@@ -1,8 +1,8 @@
 import numpy as np
 import cv2
-from framebyframe import framebyframe
-from resize_imageP import resize_image
-from get_image_halves import get_image_halves_without_border
+from stitching.framebyframe import framebyframe
+from stitching.resize_imageP import resize_image
+from stitching.get_image_halves import get_image_halves_without_border
 
 
 

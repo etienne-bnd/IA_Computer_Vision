@@ -1,7 +1,7 @@
 import cv2
 import imutils
 import numpy as np
-from resize_imageP import resize_image
+from stitching.resize_imageP import resize_image
 
 def transformation(stitched_img): 
 

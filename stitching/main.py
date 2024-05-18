@@ -1,12 +1,12 @@
-from test_avec_hommography import hommography, hommography_return_M, apply_the_matrix
-from final_transformation import transformation, transformation_data, transformation_return_transformation
-from get_image_halves import get_image_halves, get_image_halves_without_border
-from framebyframe import framebyframe, count_frames
+from stitching.test_avec_hommography import hommography, hommography_return_M, apply_the_matrix
+from stitching.final_transformation import transformation, transformation_data, transformation_return_transformation
+from stitching.get_image_halves import get_image_halves, get_image_halves_without_border
+from stitching.framebyframe import framebyframe, count_frames
 import cv2
-from resize_imageP import resize_image
+from stitching.resize_imageP import resize_image
 from tqdm import tqdm
-from mask import create_mask
-from imageStitching import image_stitcher
+from stitching.mask import create_mask
+from stitching.imageStitching import image_stitcher
 
 
 

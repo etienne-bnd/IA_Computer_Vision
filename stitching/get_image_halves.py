@@ -1,6 +1,6 @@
 import cv2
-from framebyframe import framebyframe
-from resize_imageP import resize_image
+from stitching.framebyframe import framebyframe
+from stitching.resize_imageP import resize_image
 import numpy as np
 import tkinter as tk
 from tkinter import messagebox

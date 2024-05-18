@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-from resize_imageP import resize_image
-from imageStitching import image_stitcher
+from stitching.resize_imageP import resize_image
+from stitching.imageStitching import image_stitcher
 
 def create_mask(image, position='left', border_ratio=0.01):
     """
