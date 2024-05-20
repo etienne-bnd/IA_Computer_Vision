@@ -29,7 +29,7 @@ class ColorBased_ObjectDetection:
         # Convert masked image to grayscale
         masked_image = cv2.cvtColor(masked_image, cv2.COLOR_RGB2GRAY)
         erosions=[i for i in range(10,30,3)]
-        dilations=[i for i in range(5,30,5)]
+        dilations=[i for i in range(20,30,5)]
         # shuffle(erosions)
         bounding_boxes = []
         for erosion in erosions:
