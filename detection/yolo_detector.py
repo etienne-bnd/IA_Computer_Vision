@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from detection.utils import * 
+from detection.utils_detection import * 
 
 class Yolo_ObjectDetection:
     def __init__(self, nmsThreshold = 0.5, confThreshold = 0.5, weights_path="detection/yolo_model/yolov4.weights", cfg_path="detection/yolo_model/yolov4.cfg",
