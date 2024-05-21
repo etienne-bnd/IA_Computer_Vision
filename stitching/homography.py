@@ -296,7 +296,7 @@ def apply_the_matrix(M, img1, img2):
         return results
 
 if __name__ == "__main__":
-    video_path = "stitching//videos_out_reserve//out10.mp4"
+    video_path = "stitching//video_in//out10.mp4"
     image = framebyframe(video_path, 78)
 
 

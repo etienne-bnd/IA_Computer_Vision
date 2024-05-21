@@ -44,7 +44,7 @@ def image_stitcher(images, masks=None, confidence_threshold=0.1):
 
 
 if __name__ == "__main__":
-    video_path = "stitching//videos_out_reserve//out10.mp4"
+    video_path = "stitching//video_in//out10.mp4"
     frame = framebyframe(video_path, 11)
     left_image, right_image = get_image_halves_without_border(frame)
     left_image = left_image.copy()

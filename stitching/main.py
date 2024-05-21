@@ -99,7 +99,7 @@ def frame_to_final_stitch(frame, list_value=None, turn="not first"):
 
 
 if __name__ == "__main__":
-    video_path = "stitching//videos_out_reserve//out10.mp4"
+    video_path = "stitching//video_in//out10.mp4"
     output_path = "output_video.mp4"
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 

@@ -39,7 +39,7 @@ def create_mask(image, position='left', border_ratio=0.01):
 
 
 if __name__ == "__main__":
-    video_path = "stitching//videos_out_reserve//out10.mp4"
+    video_path = "stitching//video_in//out10.mp4"
     frame = framebyframe(video_path, 10)
     image_left, image_right = get_image_halves_without_border(frame)
     image_left = image_left.copy()

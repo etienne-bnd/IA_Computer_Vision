@@ -64,7 +64,7 @@ def count_frames(video_path):
 
 if __name__ == "__main__":
 
-    video_path = "stitching//videos_out_reserve//out10.mp4"
+    video_path = "stitching//video_in//out10.mp4"
     print(count_frames(video_path))
     frame = framebyframe(video_path, 10)
     frame = resize_image(frame, 20)

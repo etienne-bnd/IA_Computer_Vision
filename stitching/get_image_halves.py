@@ -70,7 +70,7 @@ def get_screen_size():
 
 
 if __name__ == "__main__":
-    video_path = "stitching//videos_out_reserve//out10.mp4"
+    video_path = "stitching//video_in//out10.mp4"
     image = framebyframe(video_path, 0)
     if image is None:
         print(f"Impossible to load the image ")
