@@ -1,3 +1,7 @@
+import sys
+import os
+# Ajouter le répertoire racine au PYTHONPATH
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import cv2
 import numpy as np
 from detection.utils_detection import reshape_box, test_oob, sort_players

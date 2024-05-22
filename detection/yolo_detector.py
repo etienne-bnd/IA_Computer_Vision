@@ -1,5 +1,10 @@
 import cv2
 import numpy as np
+import sys
+import os
+
+# Ajouter le répertoire racine au PYTHONPATH
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from detection.utils_detection import * 
 
 class Yolo_ObjectDetection:
