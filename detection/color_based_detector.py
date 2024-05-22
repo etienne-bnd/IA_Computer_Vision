@@ -28,7 +28,7 @@ class ColorBased_ObjectDetection:
         
         # Convert masked image to grayscale
         masked_image = cv2.cvtColor(masked_image, cv2.COLOR_RGB2GRAY)
-        erosions=[i for i in range(10,30,3)]
+        erosions=[i for i in range(15,40,3)]
         dilations=[i for i in range(20,30,5)]
         # shuffle(erosions)
         bounding_boxes = []
@@ -47,7 +47,6 @@ class ColorBased_ObjectDetection:
                         (x, y, w, h) = reshape_box((x, y, w, h))
                         if test_oob((x, y, w, h), self.bounds):
                             bounding_boxes.append((x, y, w, h))
-                print(erosion,len(bounding_boxes))
                 if len(bounding_boxes)==self.n_objects:
                     self.erosion=erosion
                     self.dilation=dilation

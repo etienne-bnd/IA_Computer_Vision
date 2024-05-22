@@ -38,7 +38,7 @@ def detect_once_and_track(path_to_video,
     count_frame = -1
     trackers={}
     id_to_center_points_prev_frame = {}
-    cumulated_loss=0
+    
 
 
     while not count_frame >= frame_lim:
@@ -68,18 +68,19 @@ def detect_once_and_track(path_to_video,
                 
                 if evaluation:
                     try:
+                        cumulated_loss=0
                         (df_boxes,df_player_ids)=utils_eval.load_annotations_from_csv(path_to_annotation)
                         summary_actual_boxes =  utils_eval.from_df_to_boxes(df_boxes,df_player_ids)
                         actual_boxes=summary_actual_boxes[0]
                         mapping=evaluate_function.compute_mapping(boxes,actual_boxes)
                         cumulated_loss+=evaluate_function.evaluate(mapping,boxes,actual_boxes)
+                        additional_displays(frame,boxes=list(actual_boxes.values()),speeds=None,color=(0, 255,0),offset=100)
                     except:
                         print( "Wrong path_to_annotation name or invalid data type")
                         raise ValueError
-                    
                 cv2.namedWindow("video", cv2.WINDOW_NORMAL) 
                 cv2.resizeWindow("video", 1000, 600) 
-                additional_displays(frame,trackers)
+                additional_displays(frame,boxes=boxes,speeds=[trackers[tracker_id+1].speed for tracker_id,box in enumerate(boxes)])
                 cv2.imshow("video",frame)
                 cv2.waitKey(display_time)
 
@@ -96,16 +97,21 @@ def detect_once_and_track(path_to_video,
                 if evaluation:                        
                     actual_boxes=summary_actual_boxes[count_frame]
                     cumulated_loss+=evaluate_function.evaluate(mapping,boxes,actual_boxes)
+                    additional_displays(frame,boxes=list(actual_boxes.values()),speeds=None,color=(0, 255,0),offset=100)
                 # Display the frame with tracking information
-                additional_displays(frame,trackers)
+                additional_displays(frame,boxes=boxes,speeds=[trackers[tracker_id+1].speed for tracker_id,box in enumerate(boxes)])
                 cv2.imshow("video",frame)
                 cv2.waitKey(display_time)
-
+            
+        if evaluation:
+            print(cumulated_loss)
         else: break
     # Release resources and close windows
     cap.release()
     cv2.destroyAllWindows()
-    print(cumulated_loss)
+    
+    if evaluation:
+        print(cumulated_loss)
 
 
 if __name__ =="__main__":

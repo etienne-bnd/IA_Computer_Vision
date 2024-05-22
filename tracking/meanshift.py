@@ -12,22 +12,21 @@ class Hist_Tracker:
 
         # initialisation
         (x, y, w, h)=box
-        print(box)
         # Set up the ROI (region of interest) for tracking
         roi = frame[y:y+h, x:x+w]
-        hsv_roi =  cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
 
-        #test2
-        mask_yellow = cv2.inRange(hsv_roi, np.array([10,0,0]), np.array([100, 255, 100]))
-        mask_green = cv2.inRange(hsv_roi, np.array([100,50,50]), np.array([150, 255, 100]))
-        mask=cv2.bitwise_and(mask_yellow,cv2.bitwise_not(mask_green))
+        #test
+        mask_maillot1= cv2.inRange(roi, np.array([0,0,0]), np.array([100,100,100]))
+        mask_maillot2= cv2.inRange(roi, np.array([200,200,200]), np.array([255, 255, 255]))
 
+        
+        mask=cv2.bitwise_or(mask_maillot1,mask_maillot2)
         plt.imshow(mask, cmap='gray')
-        roi_hist = cv2.calcHist([hsv_roi],[0],mask,[180],[0,180])
+        roi_hist = cv2.calcHist([roi],[0,1,2],mask,[4,4,4],[0,255,0,255,0,255])
         cv2.normalize(roi_hist, roi_hist, 0, 255, cv2.NORM_MINMAX)
 
         # we saved the data which will help us to find the roi in the next frame
-        self.term_crit = ( cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 100, 1) #controls tracking
+        self.term_crit = ( cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 50, 1) #controls tracking
         self.roi_hist=roi_hist
         self.current_box=box
         self.speed=0.3 #initial speed value
@@ -38,9 +37,9 @@ class Hist_Tracker:
     def find_box(self,frame):
         """method for finding the new box of the previous object"""
         # the projected histogram is calculated to find the object by using the roi
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        dst = cv2.calcBackProject([hsv],[0],self.roi_hist,[0,180],1)
-        dst = cv2.dilate(dst,np.ones((1,1)))
+
+        dst = cv2.calcBackProject([frame],[0,1,2],self.roi_hist,[0,255,0,255,0,255],1)
+        dst=cv2.erode(dst,kernel=np.ones((5,5)))
         cv2.namedWindow("dst", cv2.WINDOW_NORMAL) 
         cv2.resizeWindow("dst", 600, 400) 
         cv2.imshow('dst', dst)
@@ -49,8 +48,8 @@ class Hist_Tracker:
         if ret:
             inertia_factor=0.8
             d=((new_box[0]-self.current_box[0])**2+2*(new_box[1]-self.current_box[1])**2)**0.5 #distance travelled by the player between the 2 frames
-            # if d/(1*self.speed+1)<100: #disallow the biggest displacements
-            self.speed=round(inertia_factor*self.speed+(1-inertia_factor)*d/10,1)
-            self.current_box = new_box
+            if d/(1*self.speed+1)<30: #disallow the biggest displacements
+                self.speed=round(inertia_factor*self.speed+(1-inertia_factor)*d/10,1)
+                self.current_box = new_box
         else:
-            print("find box failed")
+            print("Mean Shift Warning: find box failed")
