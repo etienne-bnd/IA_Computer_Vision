@@ -1,60 +1,66 @@
 import cv2
-from stitching.framebyframe import framebyframe
-from stitching.resize_imageP import resize_image
-import numpy as np
+from framebyframe import framebyframe
+from resize_imageP import resize_image
 import tkinter as tk
-from tkinter import messagebox
 
 
 def get_image_halves(image):
     """
-    Cette fonction prend une image en entrée et renvoie la partie gauche et la partie droite de l'image.
+    This function takes an image as input and returns the left and right halves of the image.
     
     Args:
-    - image (numpy.ndarray): L'image d'entrée.
+    - image (numpy.ndarray): The input image.
     
     Returns:
-    - left_half (numpy.ndarray): La partie gauche de l'image.
-    - right_half (numpy.ndarray): La partie droite de l'image.
+    - left_half (numpy.ndarray): The left half of the image.
+    - right_half (numpy.ndarray): The right half of the image.
     """
-    # Obtenir la largeur de l'image
-    height, width = image.shape[:2]
+    # Get the width of the image
+    _, width = image.shape[:2]
     
-    # Définir la largeur de chaque moitié (la moitié de la largeur de l'image)
+    # Define the width of each half (half of the image width)
     half_width = width // 2
     
-    # Extraire la partie gauche de l'image
-    left_half = image[:, :half_width]
+    # Extract the left half of the image
+    left_half = image[:, :half_width - 2]
     
-    # Extraire la partie droite de l'image
-    right_half = image[:, half_width:]
+    # Extract the right half of the image
+    right_half = image[:, half_width + 2:]
     
     return left_half, right_half
 
 
+
 def get_image_halves_without_border(image):
     """
-    Cette fonction prend une image en entrée et renvoie la partie gauche et la partie droite de l'image.
-    sans les gradins
-    
+    This function takes an image as input and returns the left and right halves of the image.
+    without borders.
+
     Args:
-    - image (numpy.ndarray): L'image d'entrée.
-    
+    - image (numpy.ndarray): The input image.
+
     Returns:
-    - left_half (numpy.ndarray): La partie gauche de l'image.
-    - right_half (numpy.ndarray): La partie droite de l'image.
+    - left_half (numpy.ndarray): The left half of the image.
+    - right_half (numpy.ndarray): The right half of the image.
     """
-        # on coupe en deux pour recoller après
+    # Splitting the image into halves for rejoining later
     left_half, right_half = get_image_halves(image)
 
-    # on enlève les gradins pour analyser le terrain
+    # Removing borders for terrain analysis
     _, left_half = get_image_halves(left_half)
     right_half, _ = get_image_halves(right_half)
 
     return left_half, right_half
 
 
+
 def get_screen_size():
+    """Get the screen size in pixels.
+
+    Returns:
+        tuple: Screen width and height in pixels.
+    """
+
     root = tk.Tk()
     root.withdraw()
     screen_width = root.winfo_screenwidth()
@@ -64,37 +70,38 @@ def get_screen_size():
 
 
 if __name__ == "__main__":
-    video_path = "videos_out_reserve//out10.mp4"
+    video_path = "stitching//video_in//out10.mp4"
     image = framebyframe(video_path, 0)
     if image is None:
-        print(f"Impossible de charger l'image ")
+        print(f"Impossible to load the image ")
         exit()
-    # Obtenir les parties gauche et droite de l'image
+    # Get the left and right halves of the image
     left_half, right_half = get_image_halves_without_border(image)
+    cv2.imwrite("left_part.png", left_half) 
+    cv2.imwrite("right_part.png", right_half) 
+
+
     left_half = resize_image(left_half, 20)
     right_half = resize_image(right_half, 20)
-    cv2.imshow("left half", left_half)
-    cv2.imshow("right half", right_half)
-    # Obtenir la taille de l'écran
+
     screen_width, screen_height = get_screen_size()
 
-    # Calculer les coordonnées pour centrer les fenêtres
+    # Calculate coordinates to center the windows
     left_x = max(0, (screen_width - left_half.shape[1]) // 2)
     left_y = max(0, (screen_height - left_half.shape[0]) // 2)
     right_x = max(0, left_x + left_half.shape[1])
     right_y = left_y
 
-    # Afficher les images au centre de l'écran
+    # Display images at the center of the screen
     cv2.imshow("left half", left_half)
     cv2.moveWindow("left half", left_x, left_y)
     cv2.imshow("right half", right_half)
     cv2.moveWindow("right half", right_x, right_y)
 
-    # Attendre une pression de touche
+    # Wait for a key press
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    # cv2.imwrite("left_part.png",left_half) 
-    # cv2.imwrite("right_part.png",right_half) 
+
 
     
 

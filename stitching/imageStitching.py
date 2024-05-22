@@ -1,24 +1,30 @@
 import numpy as np
 import cv2
-from stitching.framebyframe import framebyframe
-from stitching.resize_imageP import resize_image
-from stitching.get_image_halves import get_image_halves_without_border
+from framebyframe import framebyframe
+from resize_imageP import resize_image
+from get_image_halves import get_image_halves_without_border
 
 
 
 
 
-def image_stitcher(images, masks=None, seuil_confiance=0.1):
+def image_stitcher(images, masks=None, confidence_threshold=0.1):
+    """Stitch multiple images into a panoramic image.
+
+    Args:
+        images (List[numpy.ndarray]): List of input images to stitch.
+        masks (List[numpy.ndarray], optional): List of masks corresponding to input images.
+        confidence_threshold (float, optional): Confidence threshold for panorama formation.
+
+    Returns:
+        numpy.ndarray: The stitched panoramic image if successful, otherwise None.
+    """
     imageStitcher = cv2.Stitcher_create(cv2.Stitcher_SCANS)
-        # Définir les indicateurs d'interpolation
-    # imageStitcher.setInterpolationFlags(cv2.INTER_NEAREST)
-     # Par exemple, 1%
-    imageStitcher.setPanoConfidenceThresh(seuil_confiance)
+    imageStitcher.setPanoConfidenceThresh(confidence_threshold)
     status, stitched_img = imageStitcher.stitch(images, masks)
-    print(imageStitcher.waveCorrection())
-        # Vérifiez si la fusion s'est bien déroulée
+    # Check if stitching was successful
     if status == cv2.Stitcher_OK:
-        # La fusion s'est bien déroulée, vous pouvez utiliser l'image fusionnée (stitched_img)
+        # Stitching successful, use the stitched image
         cv2.imwrite("stitchedOutput.png", stitched_img)
         # stitched_img = resize_image(stitched_img, 20)
         # cv2.imshow("Stitched Image", stitched_img)
@@ -26,8 +32,8 @@ def image_stitcher(images, masks=None, seuil_confiance=0.1):
         # cv2.destroyAllWindows()
         return stitched_img
     else:
-        # La fusion a échoué, affichez le statut de l'erreur
-        print("Erreur lors de la fusion :", status)
+        # Stitching failed, print error status
+        print("Error during stitching:", status)
 
 
     
@@ -38,8 +44,8 @@ def image_stitcher(images, masks=None, seuil_confiance=0.1):
 
 
 if __name__ == "__main__":
-    video_path = "videos_out_reserve//out10.mp4"
-    frame = framebyframe(video_path, 10)
+    video_path = "stitching//video_in//out10.mp4"
+    frame = framebyframe(video_path, 11)
     left_image, right_image = get_image_halves_without_border(frame)
     left_image = left_image.copy()
     right_image = right_image.copy()

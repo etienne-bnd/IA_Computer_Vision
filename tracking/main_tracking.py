@@ -3,9 +3,13 @@ import numpy as np
 import math
 import time
 from meanshift import *
-from tracking.utils_display import *
+from utils_display import *
+# from tracking.utils_display import *
 import sys
 import os
+# Ajouter le répertoire racine au PYTHONPATH
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from detection import utils_detection, yolo_detector,color_based_detector
 from evaluation import utils_eval,evaluate_function
 
@@ -115,5 +119,5 @@ def detect_once_and_track(path_to_video,
 
 
 if __name__ =="__main__":
-    # detect_once_and_track("videos\output_video.mp4",evaluation=False,n_players=12)
-    detect_once_and_track("videos\Q4_top_30-60.mp4",evaluation=True,path_to_annotation="videos\Q4_top_30-60.csv",n_players=10)
+    detect_once_and_track("videos\output_video.mp4",evaluation=False,n_players=12)
+    # detect_once_and_track("videos\Q4_top_30-60.mp4",evaluation=True,path_to_annotation="videos\Q4_top_30-60.csv",n_players=10)
