@@ -17,7 +17,7 @@ def test_oob(box,bounds):
     xmin,xmax=bounds[0]
     ymin,ymax=bounds[1]
     tol=0.01
-    return((h>2) and ((1+tol)*(x+h//2)>= xmin) and ((1-tol)*(x+h//2)<=xmax) and ((1+tol)*(y+w//2)>= ymin) and ((1-tol)*(y+w//2)<=ymax))
+    return((h>2) and ((1+tol)*(x+h//2)>= xmin) and ((1-tol)*(x+h//2)<=xmax) and ((1+tol)*(y+w//2)>= ymin) and ((1-tol)*(y+w//2)<=ymax) and h<150 and w<150)
 
 def init_bounds(width,height,scale=0.9):
     """
@@ -51,8 +51,7 @@ def input_bounds(frame):
     The selected ROI bounds are returned as a list of tuples representing the coordinates of the top-left and bottom-right corners.
     """
     width,height,_=frame.shape
-    cv2.namedWindow("first frame", cv2.WINDOW_NORMAL) 
-    cv2.resizeWindow("first frame", 1000, 600) 
+    cv2.namedWindow("first frame", cv2.WINDOW_NORMAL)
     x, y, w, h = cv2.selectROI('first frame', frame, showCrosshair=False)
     cv2.destroyWindow('first frame')
     return([(x, x+w),(y,y+h)])

@@ -22,11 +22,11 @@ class Hist_Tracker:
         
         mask=cv2.bitwise_or(mask_maillot1,mask_maillot2)
         plt.imshow(mask, cmap='gray')
-        roi_hist = cv2.calcHist([roi],[0,1,2],mask,[4,4,4],[0,255,0,255,0,255])
+        roi_hist = cv2.calcHist([roi],[0,1,2],mask,[3,3,3],[0,255,0,255,0,255])
         cv2.normalize(roi_hist, roi_hist, 0, 255, cv2.NORM_MINMAX)
 
         # we saved the data which will help us to find the roi in the next frame
-        self.term_crit = ( cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 50, 1) #controls tracking
+        self.term_crit = ( cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 200, 1) #controls tracking
         self.roi_hist=roi_hist
         self.current_box=box
         self.speed=0.3 #initial speed value
@@ -39,9 +39,8 @@ class Hist_Tracker:
         # the projected histogram is calculated to find the object by using the roi
 
         dst = cv2.calcBackProject([frame],[0,1,2],self.roi_hist,[0,255,0,255,0,255],1)
-        dst=cv2.erode(dst,kernel=np.ones((5,5)))
+        dst = cv2.erode(dst,kernel=np.ones((2,2)))
         cv2.namedWindow("dst", cv2.WINDOW_NORMAL) 
-        cv2.resizeWindow("dst", 600, 400) 
         cv2.imshow('dst', dst)
         cv2.waitKey(1)
         ret, new_box = cv2.meanShift(dst, self.current_box, self.term_crit)
