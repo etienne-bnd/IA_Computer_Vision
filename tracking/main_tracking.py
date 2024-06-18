@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
-import math
-import time
+from tqdm import tqdm
 from meanshift import *
 from utils_display import *
 # from tracking.utils_display import *
@@ -16,7 +15,7 @@ from evaluation import utils_eval,evaluate_function
 def detect_once_and_track(path_to_video, 
                           detection_method="colorbased",
                           tracking_method="meanshift",
-                          frame_lim=1000,
+                          frame_lim=None,
                           path_to_annotation="",
                           n_players=12):
     """
@@ -44,13 +43,11 @@ def detect_once_and_track(path_to_video,
     desired_height = 1080
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, desired_width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, desired_height)
+    number_of_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-
-    while not count_frame >= frame_lim:
-
+    for _ in tqdm(range(number_of_frames)):
         ret, frame = cap.read()
         count_frame += 1
-        
         if ret:
             #resize the image if necessary
             original_height, original_width = frame.shape[0], frame.shape[1]
@@ -60,6 +57,8 @@ def detect_once_and_track(path_to_video,
             if count_frame==0:  # Step 1
                 # Initialize the object detection 
                 bounds=utils_detection.input_bounds(frame.copy())
+                cv2.namedWindow("video", cv2.WINDOW_NORMAL) 
+
                 if detection_method=="yolo":
                     od = yolo_detector.Yolo_ObjectDetection(bounds=bounds)
                 elif detection_method=="colorbased":
@@ -78,17 +77,13 @@ def detect_once_and_track(path_to_video,
                     id_to_center_points_prev_frame[tracker_id+1]=(cx,cy)
                 
                 if path_to_annotation:
-                    try:
-                        cumulated_loss=0
-                        (df_boxes,df_player_ids) = utils_eval.load_annotations_from_csv(path_to_annotation)
-                        summary_actual_boxes =  utils_eval.from_df_to_boxes(df_boxes,df_player_ids,(original_width,original_height),(desired_width, desired_height))
-                        actual_boxes=summary_actual_boxes[0]
-                        mapping=evaluate_function.compute_mapping(boxes,actual_boxes)
-                        cumulated_loss+=evaluate_function.evaluate(mapping,boxes,actual_boxes)
-                        additional_displays(frame,boxes=list(actual_boxes.values()),speeds=None,color=(0,0,255),offset=100)
-                    except:
-                        print( "Wrong path_to_annotation name or invalid data type")
-                        raise ValueError
+                    
+                    cumulated_loss=0
+                    (df_boxes,df_player_ids) = utils_eval.load_annotations_from_csv(path_to_annotation)
+                    summary_actual_boxes =  utils_eval.from_df_to_boxes(df_boxes,df_player_ids,(original_width,original_height),(desired_width, desired_height))
+                    actual_boxes=summary_actual_boxes[0]
+                    mapping=evaluate_function.compute_mapping(boxes,actual_boxes)
+
                     
                 additional_displays(frame,boxes=boxes,speeds=[trackers[tracker_id+1].speed for tracker_id,box in enumerate(boxes)],color=(255,0,0))
                 cv2.imshow("video",frame)
@@ -106,23 +101,31 @@ def detect_once_and_track(path_to_video,
                 if path_to_annotation:                        
                     actual_boxes=summary_actual_boxes[count_frame]
                     cumulated_loss+=evaluate_function.evaluate(mapping,boxes,actual_boxes)
-                    additional_displays(frame,boxes=list(actual_boxes.values()),speeds=None,color=(0,0,255),offset=100)
+                    additional_displays(frame,boxes=list(actual_boxes.values()),speeds=None,color=(0,0,255),offset=50)
+                    
                 # Display the frame with tracking information
                 additional_displays(frame,boxes=boxes,speeds=[trackers[tracker_id+1].speed for tracker_id,box in enumerate(boxes)],color=(255,0,0))
                 cv2.imshow("video",frame)
-
-            
-            if path_to_annotation:
-                print("Errors made so far:", cumulated_loss)
+                cv2.waitKey(1)
 
         else: 
             break
-        
+
     # Release resources and close windows
     cap.release()
     cv2.destroyAllWindows()
 
+    print(f"{cumulated_loss} Errors made on {path_to_video} over {count_frame} frames.", )
+
+eval_sets={
+        #"videos\Q4_top_30-60.mp4":"videos\\annotations\\Q4_top_30-60.csv",
+        #"videos\Q4_top_420-450.mp4":"videos\\annotations\\Q4_top_420-450.csv",
+
+           }
 
 if __name__ =="__main__":
     #detect_once_and_track("videos\output_video.mp4",n_players=12)
-    detect_once_and_track("videos\Q4_top_30-60.mp4",path_to_annotation="videos\Q4_top_30-60.csv",n_players=10)
+    for path_to_video,path_to_annotation in eval_sets.items():
+        detect_once_and_track(path_to_video=path_to_video,
+                              path_to_annotation=path_to_annotation,
+                              n_players=10)

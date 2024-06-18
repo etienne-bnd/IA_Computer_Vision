@@ -55,13 +55,13 @@ class ColorBased_ObjectDetection:
         # Create mask based on the color range
         frame_c = frame.copy()
         mask = cv2.inRange(frame_c, self.lower_mask, self.upper_mask)
-        
-        #Try multiple hyperparameters values
-        erosions = sorted(range(0,20,3),reverse = True)
-        dilations = sorted(range(10,50,3),reverse = True)
 
-        for erosion in erosions:
-            for dilation in dilations:
+        #Try multiple hyperparameters values
+        erosions = range(0,20,3)
+        dilations = sorted(range(10,30,3),reverse = True)
+
+        for dilation in dilations:
+            for erosion in erosions:
                 # Apply mask to the frame
                 masked_image = cv2.bitwise_and(frame_c, frame_c, mask=mask)
                 

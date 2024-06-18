@@ -18,8 +18,8 @@ def additional_displays(frame,boxes,speeds,color=(255, 0, 0),offset=0):
     for i,box in enumerate(boxes):
         (x, y, w, h) = box 
         cx,cy=int(x+w//2),int(y+h//2)
-        cv2.putText(frame, str(i+1), (cx,cy +offset + 40), cv2.FONT_HERSHEY_SIMPLEX, 2, color, 3)
         try:
-            cv2.putText(frame, "v: "+str(speeds[i]), (cx - 20, cy +offset - 40), cv2.FONT_HERSHEY_SIMPLEX, 2, color, 3)
+            cv2.putText(frame, "v: "+str(speeds[i]), (cx - 30, cy +offset + 40), cv2.FONT_HERSHEY_SIMPLEX, fontScale = 1, color = color, thickness= 2)
+            cv2.putText(frame, str(i+1), (cx,cy +offset - 40), cv2.FONT_HERSHEY_SIMPLEX, fontScale = 1, color =  color, thickness = 2)
         except:
             pass
