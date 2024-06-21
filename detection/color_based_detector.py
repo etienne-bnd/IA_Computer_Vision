@@ -53,20 +53,21 @@ class ColorBased_ObjectDetection:
             None: If detection fails.
         """
         # Create mask based on the color range
-        mask = cv2.inRange(frame, self.lower_mask, self.upper_mask)
-        
-        # Apply mask to the frame
-        masked_image = cv2.bitwise_and(frame, frame, mask=mask)
-        
-        # Convert masked image to grayscale
-        masked_image = cv2.cvtColor(masked_image, cv2.COLOR_RGB2GRAY)
-        erosions=[i for i in range(10,30,3)]
-        dilations=[i for i in range(20,30,5)]
-        # shuffle(erosions)
-        bounding_boxes = []
+        frame_c = frame.copy()
+        mask = cv2.inRange(frame_c, self.lower_mask, self.upper_mask)
 
-        for erosion in erosions:
-            for dilation in dilations:
+        #Try multiple hyperparameters values
+        erosions = range(0,20,3)
+        dilations = sorted(range(10,30,3),reverse = True)
+
+        for dilation in dilations:
+            for erosion in erosions:
+                # Apply mask to the frame
+                masked_image = cv2.bitwise_and(frame_c, frame_c, mask=mask)
+                
+                # Convert masked image to grayscale
+                masked_image = cv2.cvtColor(masked_image, cv2.COLOR_RGB2GRAY)
+
                 # Erode and dilate to remove noise
                 masked_image = cv2.erode(masked_image, kernel=np.ones((erosion, erosion), np.uint8), iterations=1)
                 masked_image = cv2.dilate(masked_image, kernel=np.ones((dilation, dilation), np.uint8), iterations=1)
@@ -84,12 +85,11 @@ class ColorBased_ObjectDetection:
                         (x, y, w, h) = reshape_box((x, y, w, h))
                         if test_oob((x, y, w, h), self.bounds):
                             bounding_boxes.append((x, y, w, h))
-                
+
                 if len(bounding_boxes)==self.n_objects:
                     self.erosion=erosion
                     self.dilation=dilation
                     return sort_players(bounding_boxes)
 
-        # If detection fails, print a message and return None
         print("detection failed")
-        return None
+        raise ValueError

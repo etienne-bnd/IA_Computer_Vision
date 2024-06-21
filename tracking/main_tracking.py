@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
-import math
-import time
+from tqdm import tqdm
 from meanshift import *
 from utils_display import *
 # from tracking.utils_display import *
@@ -16,10 +15,8 @@ from evaluation import utils_eval,evaluate_function
 def detect_once_and_track(path_to_video, 
                           detection_method="colorbased",
                           tracking_method="meanshift",
-                          display_time=1, 
-                          frame_lim=1000,
-                          evaluation=False,
-                          path_to_annotation=None,
+                          frame_lim=None,
+                          path_to_annotation="",
                           n_players=12):
     """
     1. Detect the players on the first frame, to initialize some "trackers" object (annotated by tracker_id=1,....,n)
@@ -42,17 +39,26 @@ def detect_once_and_track(path_to_video,
     count_frame = -1
     trackers={}
     id_to_center_points_prev_frame = {}
-    
+    desired_width = 1920  
+    desired_height = 1080
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, desired_width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, desired_height)
+    number_of_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-
-    while not count_frame >= frame_lim:
+    for _ in tqdm(range(number_of_frames)):
         ret, frame = cap.read()
         count_frame += 1
-            
         if ret:
+            #resize the image if necessary
+            original_height, original_width = frame.shape[0], frame.shape[1]
+            if (original_width != desired_width) or (original_height != desired_height):
+                frame = cv2.resize(frame, (desired_width, desired_height))
+
             if count_frame==0:  # Step 1
                 # Initialize the object detection 
                 bounds=utils_detection.input_bounds(frame.copy())
+                cv2.namedWindow("video", cv2.WINDOW_NORMAL) 
+
                 if detection_method=="yolo":
                     od = yolo_detector.Yolo_ObjectDetection(bounds=bounds)
                 elif detection_method=="colorbased":
@@ -60,10 +66,6 @@ def detect_once_and_track(path_to_video,
                 
                 # Perform object detection
                 boxes=od.detect(frame) # we collect the data for the detected objects
-                if boxes == None:
-                    print(f"Mauvaise détection avez vous mis le bon nombre de joueur sélectionné ?")
-                    sys.exit()
-                
                 for tracker_id,box in enumerate(boxes):
                     (x, y, w, h) = box
                     if tracking_method=="meanshift":
@@ -73,23 +75,17 @@ def detect_once_and_track(path_to_video,
                     cx,cy=x+w//2,y+h//2
                     id_to_center_points_prev_frame[tracker_id+1]=(cx,cy)
                 
-                if evaluation:
-                    try:
-                        cumulated_loss=0
-                        (df_boxes,df_player_ids)=utils_eval.load_annotations_from_csv(path_to_annotation)
-                        summary_actual_boxes =  utils_eval.from_df_to_boxes(df_boxes,df_player_ids)
-                        actual_boxes=summary_actual_boxes[0]
-                        mapping=evaluate_function.compute_mapping(boxes,actual_boxes)
-                        cumulated_loss+=evaluate_function.evaluate(mapping,boxes,actual_boxes)
-                        additional_displays(frame,boxes=list(actual_boxes.values()),speeds=None,color=(0, 255,0),offset=100)
-                    except:
-                        print( "Wrong path_to_annotation name or invalid data type")
-                        raise ValueError
-                cv2.namedWindow("video", cv2.WINDOW_NORMAL) 
-                cv2.resizeWindow("video", 1000, 600) 
-                        l_displays(frame,boxes=boxes,speeds=[trackers[tracker_id+1].speed for tracker_id,box in enumerate(boxes)])
+                if path_to_annotation:
+                    
+                    cumulated_loss=0
+                    (df_boxes,df_player_ids) = utils_eval.load_annotations_from_csv(path_to_annotation)
+                    summary_actual_boxes =  utils_eval.from_df_to_boxes(df_boxes,df_player_ids,(original_width,original_height),(desired_width, desired_height))
+                    actual_boxes=summary_actual_boxes[0]
+                    mapping=evaluate_function.compute_mapping(boxes,actual_boxes)
+
+                    
+                additional_displays(frame,boxes=boxes,speeds=[trackers[tracker_id+1].speed for tracker_id,box in enumerate(boxes)],color=(255,0,0))
                 cv2.imshow("video",frame)
-                cv2.waitKey(display_time)
 
 
             else:  # Step 2
@@ -101,26 +97,34 @@ def detect_once_and_track(path_to_video,
                     cx,cy=x+w//2,y+h//2
                     id_to_center_points_prev_frame[tracker_id]=(cx,cy)
 
-                if evaluation:                        
+                if path_to_annotation:                        
                     actual_boxes=summary_actual_boxes[count_frame]
                     cumulated_loss+=evaluate_function.evaluate(mapping,boxes,actual_boxes)
-                    additional_displays(frame,boxes=list(actual_boxes.values()),speeds=None,color=(0, 255,0),offset=100)
+                    additional_displays(frame,boxes=list(actual_boxes.values()),speeds=None,color=(0,0,255),offset=50)
+                    
                 # Display the frame with tracking information
-                additional_displays(frame,boxes=boxes,speeds=[trackers[tracker_id+1].speed for tracker_id,box in enumerate(boxes)])
+                additional_displays(frame,boxes=boxes,speeds=[trackers[tracker_id+1].speed for tracker_id,box in enumerate(boxes)],color=(255,0,0))
                 cv2.imshow("video",frame)
-                cv2.waitKey(display_time)
-            
-        if evaluation:
-            print(cumulated_loss)
-        # else: break
+                cv2.waitKey(1)
+
+        else: 
+            break
+
     # Release resources and close windows
     cap.release()
     cv2.destroyAllWindows()
-    
-    if evaluation:
-        print(cumulated_loss)
 
+    print(f"{cumulated_loss} Errors made on {path_to_video} over {count_frame} frames.", )
+
+eval_sets={
+        #"videos\Q4_top_30-60.mp4":"videos\\annotations\\Q4_top_30-60.csv",
+        #"videos\Q4_top_420-450.mp4":"videos\\annotations\\Q4_top_420-450.csv",
+
+           }
 
 if __name__ =="__main__":
-    detect_once_and_track("videos\\output_video.mp4",evaluation=False,n_players=12)
-    # detect_once_and_track("videos\\Q4_top_30-60.mp4",evaluation=True,path_to_annotation="videos\\Q4_top_30-60.csv",n_players=10)
+    #detect_once_and_track("videos\output_video.mp4",n_players=12)
+    for path_to_video,path_to_annotation in eval_sets.items():
+        detect_once_and_track(path_to_video=path_to_video,
+                              path_to_annotation=path_to_annotation,
+                              n_players=10)
