@@ -1,6 +1,10 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
+import sys
+import os
+# add to PYTHONPATH
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class Hist_Tracker:
     def __init__(self,frame,box,tracker_id):

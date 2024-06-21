@@ -7,7 +7,7 @@ from utils_display import *
 # from tracking.utils_display import *
 import sys
 import os
-# Ajouter le répertoire racine au PYTHONPATH
+# add to PYTHONPATH
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from detection import utils_detection, yolo_detector,color_based_detector
@@ -57,9 +57,12 @@ def detect_once_and_track(path_to_video,
                     od = yolo_detector.Yolo_ObjectDetection(bounds=bounds)
                 elif detection_method=="colorbased":
                     od = color_based_detector.ColorBased_ObjectDetection(bounds=bounds,n_objects=n_players)
-
+                
                 # Perform object detection
                 boxes=od.detect(frame) # we collect the data for the detected objects
+                if boxes == None:
+                    print(f"Mauvaise détection avez vous mis le bon nombre de joueur sélectionné ?")
+                    sys.exit()
                 
                 for tracker_id,box in enumerate(boxes):
                     (x, y, w, h) = box
@@ -84,7 +87,7 @@ def detect_once_and_track(path_to_video,
                         raise ValueError
                 cv2.namedWindow("video", cv2.WINDOW_NORMAL) 
                 cv2.resizeWindow("video", 1000, 600) 
-                additional_displays(frame,boxes=boxes,speeds=[trackers[tracker_id+1].speed for tracker_id,box in enumerate(boxes)])
+                        l_displays(frame,boxes=boxes,speeds=[trackers[tracker_id+1].speed for tracker_id,box in enumerate(boxes)])
                 cv2.imshow("video",frame)
                 cv2.waitKey(display_time)
 
@@ -109,7 +112,7 @@ def detect_once_and_track(path_to_video,
             
         if evaluation:
             print(cumulated_loss)
-        else: break
+        # else: break
     # Release resources and close windows
     cap.release()
     cv2.destroyAllWindows()
@@ -119,5 +122,5 @@ def detect_once_and_track(path_to_video,
 
 
 if __name__ =="__main__":
-    detect_once_and_track("videos\output_video.mp4",evaluation=False,n_players=12)
-    # detect_once_and_track("videos\Q4_top_30-60.mp4",evaluation=True,path_to_annotation="videos\Q4_top_30-60.csv",n_players=10)
+    detect_once_and_track("videos\\output_video.mp4",evaluation=False,n_players=12)
+    # detect_once_and_track("videos\\Q4_top_30-60.mp4",evaluation=True,path_to_annotation="videos\\Q4_top_30-60.csv",n_players=10)
