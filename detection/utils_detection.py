@@ -19,24 +19,6 @@ def test_oob(box,bounds):
     tol=0.01
     return((h>2) and ((1+tol)*(x+h//2)>= xmin) and ((1-tol)*(x+h//2)<=xmax) and ((1+tol)*(y+w//2)>= ymin) and ((1-tol)*(y+w//2)<=ymax) and h<150 and w<150)
 
-def init_bounds(width,height,scale=0.9):
-    """
-    Initializes the bounds of a field based on the given dimensions and scale.
-
-    Args:
-        width (float): The width of the field.
-        height (float): The height of the field.
-        scale (float, optional): The scale factor to apply to the dimensions for creating the bounds (default is 0.9).
-
-    Returns:
-        tuple: A tuple containing the bounds of the field in the format ((xmin, xmax), (ymin, ymax)).
-
-    The function calculates the minimum and maximum bounds for both width and height by applying the scale factor.
-    """
-    bounds = [((1-scale)*width,scale*width),((1-scale)*height,scale*height)]
-    return(bounds)
-
-
 def input_bounds(frame):
     """
     Allows the user to select a region of interest (ROI) within a given frame interactively.
@@ -47,14 +29,36 @@ def input_bounds(frame):
     Returns:
         list: A list containing the bounds of the selected ROI in the format [(xmin, xmax), (ymin, ymax)].
 
-    This function displays the input frame in a resizable window and lets the user interactively select a rectangular ROI.
-    The selected ROI bounds are returned as a list of tuples representing the coordinates of the top-left and bottom-right corners.
+    This function displays the input frame with an instructional text, in a resizable window and lets the user 
+    interactively select a rectangular ROI. The selected ROI bounds are returned as a list of tuples representing 
+    the coordinates of the top-left and bottom-right corners.
     """
-    width,height,_=frame.shape
-    cv2.namedWindow("first frame", cv2.WINDOW_NORMAL)
-    x, y, w, h = cv2.selectROI('first frame', frame, showCrosshair=False)
-    cv2.destroyWindow('first frame')
-    return([(x, x+w),(y,y+h)])
+    # Define the text and its properties
+    text = "Draw the rectangle containing only the players"
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 1
+    color = (0, 255, 0)  # Green color
+    thickness = 2
+    text_size, _ = cv2.getTextSize(text, font, font_scale, thickness)
+    
+    # Calculate the text position to be centered
+    text_x = (frame.shape[1] - text_size[0]) // 2
+    text_y = 50  # Fixed height position near the top
+    
+    # Draw the text on the frame
+    cv2.putText(frame, text, (text_x, text_y), font, font_scale, color, thickness)
+
+    # Display the frame in a resizable window
+    cv2.namedWindow("Select ROI", cv2.WINDOW_NORMAL)
+    cv2.imshow("Select ROI", frame)
+    
+    # Allow the user to select the ROI
+    x, y, w, h = cv2.selectROI('Select ROI', frame, showCrosshair=False)
+    
+    # Close the window after ROI selection
+    cv2.destroyWindow('Select ROI')
+    
+    return [(x, x + w), (y, y + h)]
 
 def reshape_box(box):
     """

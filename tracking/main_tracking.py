@@ -1,34 +1,32 @@
 import cv2
 import numpy as np
 from tqdm import tqdm
-from meanshift import *
-from utils_display import *
-# from tracking.utils_display import *
 import sys
 import os
 # add to PYTHONPATH
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+from tracking.meanshift import *
+from tracking.utils_display import *
 from detection import utils_detection, yolo_detector,color_based_detector
 from evaluation import utils_eval,evaluate_function
 
 def detect_once_and_track(path_to_video, 
                           detection_method="colorbased",
                           tracking_method="meanshift",
-                          frame_lim=None,
                           path_to_annotation="",
-                          n_players=12):
+                          n_players=12,
+                          max_time=None):
     """
     1. Detect the players on the first frame, to initialize some "trackers" object (annotated by tracker_id=1,....,n)
     2. Use the method tracker.find_box(frame) to update the bounding box and keep the tracker_id coherent
 
     Args:
-        display_shape, display_time : the shape and the time (ms) spent for the displayed frame
+        path_to_video: the path to the video
+        path_to_annotation: the path to the annotation (if any)
         detection_method: The detection method used for step 1 ("colorbased", or "Yolo")
         tracking_method: The tracking method used for step 1 ("meanshift", or "naive")
-        frame_lim: The maximum number of step
-        reshape: whether the boxes should be scaled down
         n_objects: number of players to track 
+        max_time: the amount of seconds of the video to process (None means no time limit)
     """
     assert detection_method in ["colorbased","yolo"], "Wrong detection method name"
     assert tracking_method in ["meanshift"], "Wrong tracking method name"
@@ -43,8 +41,10 @@ def detect_once_and_track(path_to_video,
     desired_height = 1080
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, desired_width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, desired_height)
-    number_of_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
+    if max_time is None:
+        number_of_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    else:
+        number_of_frames = min(int(max_time*1000/cap.get(cv2.CAP_PROP_FPS)), int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))
     for _ in tqdm(range(number_of_frames)):
         ret, frame = cap.read()
         count_frame += 1
@@ -114,13 +114,11 @@ def detect_once_and_track(path_to_video,
     cap.release()
     cv2.destroyAllWindows()
 
-    print(f"{cumulated_loss} Errors made on {path_to_video} over {count_frame} frames.", )
+    if path_to_annotation:print(f"{cumulated_loss} Errors made on {path_to_video} over {count_frame} frames.", )
 
 eval_sets={
-        #"videos\Q4_top_30-60.mp4":"videos\\annotations\\Q4_top_30-60.csv",
-        #"videos\Q4_top_420-450.mp4":"videos\\annotations\\Q4_top_420-450.csv",
-
-           }
+        "videos\Q4_top_30-60.mp4":"videos\\annotations\\Q4_top_30-60.csv",
+        "videos\Q4_top_420-450.mp4":"videos\\annotations\\Q4_top_420-450.csv",}
 
 if __name__ =="__main__":
     #detect_once_and_track("videos\output_video.mp4",n_players=12)

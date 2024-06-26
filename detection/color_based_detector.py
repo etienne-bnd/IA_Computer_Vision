@@ -57,8 +57,8 @@ class ColorBased_ObjectDetection:
         mask = cv2.inRange(frame_c, self.lower_mask, self.upper_mask)
 
         #Try multiple hyperparameters values
-        erosions = range(0,20,3)
-        dilations = sorted(range(10,30,3),reverse = True)
+        erosions = range(0,30,3)
+        dilations = sorted(range(10,40,3),reverse = True)
 
         for dilation in dilations:
             for erosion in erosions:
