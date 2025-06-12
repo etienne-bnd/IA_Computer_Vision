@@ -25,7 +25,7 @@ def detect_once_and_track(path_to_video,
         path_to_annotation: the path to the annotation (if any)
         detection_method: The detection method used for step 1 ("colorbased", or "Yolo")
         tracking_method: The tracking method used for step 1 ("meanshift", or "naive")
-        n_objects: number of players to track 
+        n_players: number of players to track 
         max_time: the amount of seconds of the video to process (None means no time limit)
     """
     assert detection_method in ["colorbased","yolo"], "Wrong detection method name"
