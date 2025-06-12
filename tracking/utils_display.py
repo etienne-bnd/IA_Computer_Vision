@@ -1,7 +1,7 @@
 import cv2 
 
 def draw_ellipse(frame,boxes,color):
-    # Draw transparent ellipse over the original frame, representing each player
+    """ Draw transparent ellipse over the original frame, representing each player """
     overlay = frame.copy()
     
     for box in boxes:
